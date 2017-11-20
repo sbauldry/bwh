@@ -206,27 +206,5 @@ gen hrm = (nhm/3)/nm
 gen hrf = (nhf/3)/nf
 
 
-*** variable labels
-lab var np "total population"
-lab var nw "total population white alone"
-lab var nb "total population black alone"
-lab var nm "total population male"
-lab var nf "total population female"
-
-lab var nho "total homicides overall"
-lab var nhw "total homicides white"
-lab var nhb "total homicides black"
-lab var nhm "total homicides male"
-lab var nhf "total homicides female"
-
-lab var hro "overall homicide rate"
-lab var hrw "white homicide rate"
-lab var hrb "black homicide rate"
-lab var hrm "male homicide rate"
-lab var hrf "female homicide rate"
-
-desc
-
-
 *** save data for analysis
 save bwh-data, replace
