@@ -132,7 +132,7 @@ drop if _merge == 1 | _merge == 2
 *** Construct MSA level data set with homicide counts
 gen nh = 1
 
-tempfile d1 d2 d3 d4 d5 d6
+tempfile d1 d2 d3 d4 d5 d6 d7 d8
 preserve
 collapse (count) nho = nh (first) name, by(metroid)
 save `d1', replace
@@ -162,12 +162,24 @@ collapse (count) nhm = nh, by(metroid)
 save `d5', replace
 restore
 
+preserve
+keep if age >= 15 & age < 35
+collapse (count) nhya = nh, by(metroid)
+save `d6', replace
+restore
+
+preserve
+keep if age < 15 | age >= 35
+collapse (count) nhoa = nh, by(metroid)
+save `d7', replace
+restore
+
 use `d1', replace
-forval i = 2/5 {
+forval i = 2/7 {
 	merge 1:1 metroid using `d`i''
 	drop _merge
 }
-save `d6', replace
+save `d8', replace
 
 
 *** Preparing ACS data on population size for MSAs
@@ -182,28 +194,37 @@ replace pg = 2 if POPGROUPdisplaylabel == "White alone"
 replace pg = 3 if POPGROUPdisplaylabel == "Black or African American alone"
 keep if !mi(pg)
 
+destring GEOid2 HD01*, replace
+
 rename (GEOid2 HD01_VD01 HD01_VD02 HD01_VD26) (metroid np nm nf)
 
-keep metroid pg np nm nf
-reshape wide np nm nf, i(metroid) j(pg)
-rename (np1 np2 np3 nm1 nf1) (np nw nb nm nf)
-keep metroid np nw nb nm nf
-destring _all, replace
+gen nya = HD01_VD06 + HD01_VD07 + HD01_VD08 + HD01_VD09 + HD01_VD10 +     ///
+  HD01_VD11 + HD01_VD12 + HD01_VD30 + HD01_VD31 + HD01_VD32 + HD01_VD33 + ///
+  HD01_VD34 + HD01_VD35 + HD01_VD36
+  
+gen noa = np - nya
+
+keep metroid pg np nm nf nya noa
+reshape wide np nm nf nya noa, i(metroid) j(pg)
+rename (np1 np2 np3 nm1 nf1 nya1 noa1) (np nw nb nm nf nya noa)
+keep metroid np nw nb nm nf nya noa
 
 *** merging with homicide data
-merge 1:1 metroid using `d6'
+merge 1:1 metroid using `d8'
 
 * drop small number of MSAs that did not merge
 drop if _merge != 3
 drop _merge
 
 
-*** generate homicide rates
-gen hro = (nho/3)/np
-gen hrw = (nhw/3)/nw
-gen hrb = (nhb/3)/nb
-gen hrm = (nhm/3)/nm
-gen hrf = (nhf/3)/nf
+*** generate homicide rates per 100,000
+gen hro =  ((nho/3)/np)*100000
+gen hrw =  ((nhw/3)/nw)*100000
+gen hrb =  ((nhb/3)/nb)*100000
+gen hrm =  ((nhm/3)/nm)*100000
+gen hrf =  ((nhf/3)/nf)*100000
+gen hrya = ((nhya/3)/nya)*100000
+gen hroa = ((nhoa/3)/noa)*100000
 
 
 *** variable labels
@@ -212,18 +233,24 @@ lab var nw "total population white alone"
 lab var nb "total population black alone"
 lab var nm "total population male"
 lab var nf "total population female"
+lab var nya "total population young adults (15-34)"
+lab var noa "total population other ages (!15-34)"
 
 lab var nho "total homicides overall"
 lab var nhw "total homicides white"
 lab var nhb "total homicides black"
 lab var nhm "total homicides male"
 lab var nhf "total homicides female"
+lab var nhya "total homicides young adults (15-34)"
+lab var nhoa "total homicides other ages (!15-34)"
 
 lab var hro "overall homicide rate"
 lab var hrw "white homicide rate"
 lab var hrb "black homicide rate"
 lab var hrm "male homicide rate"
 lab var hrf "female homicide rate"
+lab var hrya "young adult homicide rate"
+lab var hroa "other ages homicide rate"
 
 
 *** save data for analysis
