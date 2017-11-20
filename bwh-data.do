@@ -208,16 +208,3 @@ gen hrf = (nhf/3)/nf
 
 *** save data for analysis
 save bwh-data, replace
-
-
-
-
-
-
-
-
-
-
-
-
-
