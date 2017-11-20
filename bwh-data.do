@@ -225,8 +225,6 @@ lab var hrb "black homicide rate"
 lab var hrm "male homicide rate"
 lab var hrf "female homicide rate"
 
-desc
-
 
 *** save data for analysis
 save bwh-data, replace
