@@ -9,7 +9,12 @@ cd ~/dropbox/research/statistics/bwh/bwh-work
 use bwh-data, replace
 
 
+*** Descriptive statistics
+sum hr* if nb > 20000 & !mi(hrb)
+
+
 *** Estimating correlations and confidence intervals
+*** note: ci2 is a user-written command
 postutil clear
 tempfile PF
 postfile PF id n nb es1 lb1 ub1 using `PF', replace
@@ -34,6 +39,14 @@ forval i = 10000(5000)30000 {
 	local mflb = r(lb)
 	
 	post PF (`k') (`n') (`i') (`mfcr') (`mfub') (`mflb')
+	
+	local l = `k' + 3
+	qui ci2 hrya hroa if nb > `i', corr
+	local yocr = r(rho)
+	local youb = r(ub)
+	local yolb = r(lb)
+	
+	post PF (`l') (`n') (`i') (`yocr') (`youb') (`yolb')
 }
 
 postclose PF
@@ -45,9 +58,10 @@ use `PF'
 graph twoway (rspike ub1 lb1 id) (scatter es1 id, mc(black)), scheme(s1mono) ///
   ytit("correlation") ylab(-0.2(0.2)1, angle(h) grid gstyle(dot)) xtit("")   ///
   xlab(1 "10K" 1.5 "15K" 2 `""20K" "{bf:White-Black}"' 2.5 "25K" 3 "30K"     ///
-       4 "10K" 4.5 "15K" 5 `""20K" "{bf:Male-Female}"' 5.5 "25K" 6 "30K",    ///
+       4 "10K" 4.5 "15K" 5 `""20K" "{bf:Male-Female}"' 5.5 "25K" 6 "30K"     ///
+	   7 "10K" 7.5 "15K" 8 `""20K" "{bf:YA-Other}"' 8.5 "25K" 9 "30K",       ///
 	   grid gstyle(dot)) legend(off)                                         ///
-  tit("Homicide Rate Correlations across Range of Black Population Sizes",   ///
-  size(medium)) note("Estimates with 95% confidence intervals.")
+  tit("Homicide Rate Correlations across Range of Minimum Black Population Sizes", ///
+  size(medsmall)) note("Estimates with 95% confidence intervals. YA = young adult.")
 graph export ~/desktop/bwh-fig.pdf, replace
 restore
