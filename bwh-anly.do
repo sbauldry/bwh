@@ -63,5 +63,67 @@ graph twoway (rspike ub1 lb1 id) (scatter es1 id, mc(black)), scheme(s1mono) ///
 	   grid gstyle(dot)) legend(off)                                         ///
   tit("Homicide Rate Correlations across Range of Minimum Black Population Sizes", ///
   size(medsmall)) note("Estimates with 95% confidence intervals. YA = young adult.")
-graph export ~/desktop/bwh-fig.pdf, replace
+graph export ~/desktop/bwh-fig1.pdf, replace
 restore
+
+
+*** Generating scatterplots
+
+* Unstandardized black-white
+graph twoway scatter hrw hrb [w = np] if nb > 25000, scheme(s1mono) ///
+  ylab(0(2)10, angle(h) grid gstyle(dot)) msymbol(circle_hollow)    ///
+  xlab( , grid gstyle(dot)) text(5.2 57.3 "NOLA")                   ///
+  tit("Unstandardized Black and White Homicide Rates")              ///
+  note("MSAs with at least 25,000 blacks. Weighted by MSA Size.")         
+graph export ~/desktop/bwh-fig2.pdf, replace
+  
+* Unstandardized male-female
+graph twoway scatter hrf hrm [w = np] if nb > 25000, scheme(s1mono) ///
+  ylab( , angle(h) grid gstyle(dot)) msymbol(circle_hollow)         ///
+  xlab( , grid gstyle(dot)) text(5 39 "NOLA")                       ///
+  tit("Unstandardized Male and Female Homicide Rates")              ///
+  note("MSAs with at least 25,000 blacks. Weighted by MSA Size.")         
+graph export ~/desktop/bwh-fig3.pdf, replace
+  
+* Unstandardized young adult-other
+graph twoway scatter hroa hrya [w = np] if nb > 25000, scheme(s1mono) ///
+  ylab( , angle(h) grid gstyle(dot)) msymbol(circle_hollow)           ///
+  xlab( , grid gstyle(dot)) text(8.8 57.2 "NOLA")                     ///
+  tit("Unstandardized Young Adult and Other Ages Homicide Rates")     ///
+  note("MSAs with at least 25,000 blacks. Weighted by MSA Size.")           
+graph export ~/desktop/bwh-fig4.pdf, replace
+
+
+* Standardized black-white
+egen shrb = std(hrb)
+egen shrw = std(hrw)
+gen lbp = (nb > 10000 & nb < 25000)
+
+graph twoway (scatter shrw shrb if nb > 25000, msymbol(circle_hollow) ) ///
+  (lfit shrw shrb if nb > 25000, lc(black)), scheme(s1mono) legend(off) ///
+  ylab( , angle(h) grid gstyle(dot)) xlab( , grid gstyle(dot))          ///
+  tit("Standardized Black and White Homicide Rates")                    ///
+  note("MSAs with at least 25,000 blacks.")                             ///
+  xtit("standardized black homicide rate")                              ///
+  ytit("standardized white homicide rate")
+graph export ~/desktop/bwh-fig5.pdf, replace
+
+graph twoway (scatter shrw shrb if nb > 25000, msymbol(circle_hollow) )   ///
+  (lfit shrw shrb if nb > 25000, lc(black))                               ///
+  (scatter shrw shrb if lbp, msymbol(circle))                             ///
+  (lfit shrw shrb if lbp, lc(black) lp(dash)), scheme(s1mono) legend(off) ///
+  ylab( , angle(h) grid gstyle(dot)) xlab( , grid gstyle(dot))            ///
+  tit("Standardized Black and White Homicide Rates")                      ///
+  note("Dark circles: MSAs with 10-25K blacks. Open circles: MSAs with 25K+ blacks.") ///
+  xtit("standardized black homicide rate")                                ///
+  ytit("standardized white homicide rate")
+graph export ~/desktop/bwh-fig6.pdf, replace
+
+
+
+  
+  
+
+
+  
+
