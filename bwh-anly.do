@@ -121,6 +121,14 @@ graph export ~/desktop/bwh-fig6.pdf, replace
 
 
 
+*** Unemployment and homicide
+corr hrb hrw if !mi(urb)
+
+regress hro uro if !mi(urb)
+regress hrb urb if !mi(urb)
+regress hrw urw if !mi(urb)
+
+
   
   
 
