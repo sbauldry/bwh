@@ -123,8 +123,7 @@ replace cntyfips = "12086" if cntyfips == "12025"
 replace cntyfips = "42260" if cntyfips == "14600"
 
 *** Merge with MSA data
-merge m:1 cntyfips using ///
-  ~/dropbox/research/statistics/bwh/bwh-work/countyTOmsa08
+merge m:1 cntyfips using bwh-source-data/countyTOmsa08
   
 drop if _merge == 1 | _merge == 2
 
@@ -187,7 +186,7 @@ save `d8', replace
 *** factfinder.census.gov/faces/nav/jsf/pages/download_center.xhtml#none
 *** downloaded November 20, 2017
 clear
-import excel using bwh-acs/ACS_10_SF4_B01001_with_ann, first
+import excel using bwh-source-data/ACS_10_SF4_B01001_with_ann, first
 
 gen pg = 1 if POPGROUPdisplaylabel == "Total population"
 replace pg = 2 if POPGROUPdisplaylabel == "White alone"
@@ -215,6 +214,20 @@ merge 1:1 metroid using `d8'
 * drop small number of MSAs that did not merge
 drop if _merge != 3
 drop _merge
+
+tempfile d9
+save `d9', replace
+
+
+*** Merging BLS data on unemployment rates for selected MSAs
+*** Data from Geographic Profile of Employment and Unemployment, 2010
+clear
+import excel using bwh-source-data/bwh-bls-data, first
+drop msaname
+
+merge 1:1 metroid using `d9'
+drop _merge
+
 
 
 *** generate homicide rates per 100,000
@@ -252,6 +265,11 @@ lab var hrf "female homicide rate"
 lab var hrya "young adult homicide rate"
 lab var hroa "other ages homicide rate"
 
+lab var uro "overall unemployment rate"
+lab var urw "white unemployment rate"
+lab var urb "black unemployment rate"
+lab var urm "male unemployment rate"
+lab var urf "female unemployment rate"
 
 *** save data for analysis
 save bwh-data, replace
