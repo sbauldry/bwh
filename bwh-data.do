@@ -229,6 +229,16 @@ merge 1:1 metroid using `d9'
 drop _merge
 
 
+*** identifying southern cities
+gen south = regexm(name, "AL")
+foreach x in AR DE FL GA KY LA MD NC OK SC TN TX VA WV {
+  replace south = regexm(name, "`x'") if south == 0
+}
+replace south = regexm(name, "Biloxi") if south == 0
+replace south = regexm(name, "Hattiesburg") if south == 0
+replace south = regexm(name, "Jackson, MS") if south == 0
+replace south = regexm(name, "Pascagoula") if south == 0
+
 
 *** generate homicide rates per 100,000
 gen hro =  ((nho/3)/np)*100000
