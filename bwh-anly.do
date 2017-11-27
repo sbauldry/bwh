@@ -133,9 +133,10 @@ regress hrw urw if !mi(urb)
 corr uro urm urf
 
 
-  
-  
+*** South and homicide
+regress hro south if nb > 25000 & !mi(hrb)
+regress hrb south if nb > 25000 & !mi(hrb)
+regress hrw south if nb > 25000 & !mi(hrb) 
 
-
-  
-
+gsort -hrb
+list name nb hrb if nb > 25000 & !mi(hrb) & hrb > 35, clean noobs
