@@ -55,6 +55,7 @@ postclose PF
 preserve
 use `PF'
 
+* graphing across all city sizes
 graph twoway (rspike ub1 lb1 id) (scatter es1 id, mc(black)), scheme(s1mono) ///
   ytit("correlation") ylab(-0.2(0.2)1, angle(h) grid gstyle(dot)) xtit("")   ///
   xlab(1 "10K" 1.5 "15K" 2 `""20K" "{bf:White-Black}"' 2.5 "25K" 3 "30K"     ///
@@ -64,34 +65,44 @@ graph twoway (rspike ub1 lb1 id) (scatter es1 id, mc(black)), scheme(s1mono) ///
   tit("Homicide Rate Correlations across Range of Minimum Black Population Sizes", ///
   size(medsmall)) note("Estimates with 95% confidence intervals. YA = young adult.")
 graph export ~/desktop/bwh-fig1.pdf, replace
+
+* graphing just 20K+
+keep if id == 2 | id == 5 | id == 8
+recode id (2 = 1) (5 = 2) (8 = 3)
+graph twoway (rspike ub1 lb1 id) (scatter es1 id, mc(black)), scheme(s1mono) ///
+  ytit("correlation") ylab(-0.2(0.2)1, angle(h) grid gstyle(dot)) xtit("")   ///
+  xlab(0 " " 1 "White-Black" 2 "Male-Female" 3 "YA-Other" 4 " ", grid        ///
+  gstyle(dot)) legend(off) tit("Homicide Rates Correlations")                ///
+  saving(g1, replace)
 restore
 
 
 *** Generating scatterplots
 
 * Unstandardized black-white
-graph twoway scatter hrw hrb [w = np] if nb > 25000, scheme(s1mono) ///
+graph twoway scatter hrw hrb [w = np] if nb > 20000, scheme(s1mono) ///
   ylab(0(2)10, angle(h) grid gstyle(dot)) msymbol(circle_hollow)    ///
-  xlab( , grid gstyle(dot)) text(5.2 57.3 "NOLA")                   ///
-  tit("Unstandardized Black and White Homicide Rates")              ///
-  note("MSAs with at least 25,000 blacks. Weighted by MSA Size.")         
+  xlab( , grid gstyle(dot)) text(5.2 57.5 "NOLA", size(small))      ///
+  tit("Black and White") saving(g2, replace)
 graph export ~/desktop/bwh-fig2.pdf, replace
   
 * Unstandardized male-female
-graph twoway scatter hrf hrm [w = np] if nb > 25000, scheme(s1mono) ///
-  ylab( , angle(h) grid gstyle(dot)) msymbol(circle_hollow)         ///
-  xlab( , grid gstyle(dot)) text(5 39 "NOLA")                       ///
-  tit("Unstandardized Male and Female Homicide Rates")              ///
-  note("MSAs with at least 25,000 blacks. Weighted by MSA Size.")         
+graph twoway scatter hrf hrm [w = np] if nb > 20000, scheme(s1mono) ///
+  ylab(0(2)10, angle(h) grid gstyle(dot)) msymbol(circle_hollow)    ///
+  xlab( , grid gstyle(dot)) text(5 39 "NOLA", size(small))          ///
+  tit("Male and Female") saving(g3, replace)         
 graph export ~/desktop/bwh-fig3.pdf, replace
   
 * Unstandardized young adult-other
-graph twoway scatter hroa hrya [w = np] if nb > 25000, scheme(s1mono) ///
-  ylab( , angle(h) grid gstyle(dot)) msymbol(circle_hollow)           ///
-  xlab( , grid gstyle(dot)) text(8.8 57.2 "NOLA")                     ///
-  tit("Unstandardized Young Adult and Other Ages Homicide Rates")     ///
-  note("MSAs with at least 25,000 blacks. Weighted by MSA Size.")           
+graph twoway scatter hroa hrya [w = np] if nb > 20000, scheme(s1mono) ///
+  ylab(0(2)10, angle(h) grid gstyle(dot)) msymbol(circle_hollow)      ///
+  xlab( , grid gstyle(dot)) text(8.8 56.8 "NOLA", size(small))        ///
+  tit("Young Adult and Other Ages") saving(g4, replace)          
 graph export ~/desktop/bwh-fig4.pdf, replace
+
+
+*** Combining graphs
+graph combine g2.gph g3.gph g4.gph g1.gph, scheme(s1mono) iscale(0.5)
 
 
 * Standardized black-white
