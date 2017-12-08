@@ -240,6 +240,7 @@ replace south = regexm(name, "Jackson, MS") if south == 0
 replace south = regexm(name, "Pascagoula") if south == 0
 
 
+
 *** generate homicide rates per 100,000
 gen hro =  ((nho/3)/np)*100000
 gen hrw =  ((nhw/3)/nw)*100000

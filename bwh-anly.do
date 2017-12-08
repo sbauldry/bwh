@@ -10,7 +10,7 @@ use bwh-data, replace
 
 
 *** Descriptive statistics
-sum hr* if nb > 20000 & !mi(hrb)
+sum hr* if nb >= 20000 & !mi(nb)
 
 
 *** Estimating correlations and confidence intervals
@@ -22,10 +22,10 @@ postfile PF id n nb es1 lb1 ub1 using `PF', replace
 forval i = 10000(5000)30000 {
 	local j = `i'/10000
 	
-	qui sum nb if nb > `i'
+	qui sum nb if nb >= `i' & !mi(nb)
 	local n = r(N)
 
-	qui ci2 hrw hrb if nb > `i', corr
+	qui ci2 hrw hrb if nb >= `i' & !mi(nb), corr
 	local bwcr = r(rho)
 	local bwub = r(ub)
 	local bwlb = r(lb)
@@ -33,7 +33,7 @@ forval i = 10000(5000)30000 {
 	post PF (`j') (`n') (`i') (`bwcr') (`bwub') (`bwlb')
 	
 	local k = `j' + 3
-	qui ci2 hrm hrf if nb > `i', corr
+	qui ci2 hrm hrf if nb >= `i' & !mi(nb), corr
 	local mfcr = r(rho)
 	local mfub = r(ub)
 	local mflb = r(lb)
@@ -41,7 +41,7 @@ forval i = 10000(5000)30000 {
 	post PF (`k') (`n') (`i') (`mfcr') (`mfub') (`mflb')
 	
 	local l = `k' + 3
-	qui ci2 hrya hroa if nb > `i', corr
+	qui ci2 hrya hroa if nb >= `i' & !mi(nb), corr
 	local yocr = r(rho)
 	local youb = r(ub)
 	local yolb = r(lb)
@@ -64,7 +64,7 @@ graph twoway (rspike ub1 lb1 id) (scatter es1 id, mc(black)), scheme(s1mono) ///
 	   grid gstyle(dot)) legend(off)                                         ///
   tit("Homicide Rate Correlations across Range of Minimum Black Population Sizes", ///
   size(medsmall)) note("Estimates with 95% confidence intervals. YA = young adult.")
-graph export ~/desktop/bwh-fig1.pdf, replace
+graph export ~/desktop/bwh-fig1a.pdf, replace
 
 * graphing just 20K+
 keep if id == 2 | id == 5 | id == 8
@@ -80,74 +80,47 @@ restore
 *** Generating scatterplots
 
 * Unstandardized black-white
-graph twoway scatter hrw hrb [w = np] if nb > 20000, scheme(s1mono) ///
-  ylab(0(2)10, angle(h) grid gstyle(dot)) msymbol(circle_hollow)    ///
-  xlab( , grid gstyle(dot)) text(5.2 57.5 "NOLA", size(small))      ///
-  tit("Black and White") saving(g2, replace)
-graph export ~/desktop/bwh-fig2.pdf, replace
+graph twoway scatter hrw hrb [w = np] if nb >= 20000 & !mi(nb),  ///
+  ylab(0(2)10, angle(h) grid gstyle(dot)) msymbol(circle_hollow) ///
+  xlab( , grid gstyle(dot)) text(5.2 57.5 "NOLA", size(small))   ///
+  tit("Black and White") saving(g2, replace) scheme(s1mono) 
   
 * Unstandardized male-female
-graph twoway scatter hrf hrm [w = np] if nb > 20000, scheme(s1mono) ///
-  ylab(0(2)10, angle(h) grid gstyle(dot)) msymbol(circle_hollow)    ///
-  xlab( , grid gstyle(dot)) text(5 39 "NOLA", size(small))          ///
-  tit("Male and Female") saving(g3, replace)         
-graph export ~/desktop/bwh-fig3.pdf, replace
+graph twoway scatter hrf hrm [w = np] if nb >= 20000 & !mi(nb),  ///
+  ylab(0(2)10, angle(h) grid gstyle(dot)) msymbol(circle_hollow) ///
+  xlab( , grid gstyle(dot)) text(5 39 "NOLA", size(small))       ///
+  tit("Male and Female") saving(g3, replace) scheme(s1mono)         
   
 * Unstandardized young adult-other
-graph twoway scatter hroa hrya [w = np] if nb > 20000, scheme(s1mono) ///
-  ylab(0(2)10, angle(h) grid gstyle(dot)) msymbol(circle_hollow)      ///
-  xlab( , grid gstyle(dot)) text(8.8 56.8 "NOLA", size(small))        ///
-  tit("Young Adult and Other Ages") saving(g4, replace)          
-graph export ~/desktop/bwh-fig4.pdf, replace
+graph twoway scatter hroa hrya [w = np] if nb >= 20000 & !mi(nb),      ///
+  ylab(0(2)10, angle(h) grid gstyle(dot)) msymbol(circle_hollow)       ///
+  xlab( , grid gstyle(dot)) text(8.8 56.8 "NOLA", size(small))         ///
+  tit("Young Adult and Other Ages") saving(g4, replace) scheme(s1mono)          
 
-
-*** Combining graphs
+* Combining graphs
 graph combine g2.gph g3.gph g4.gph g1.gph, scheme(s1mono) iscale(0.5)
+graph export ~/desktop/bwh-fig1.pdf, replace
 
 
-* Standardized black-white
-egen shrb = std(hrb)
-egen shrw = std(hrw)
-gen lbp = (nb > 10000 & nb < 25000)
-
-graph twoway (scatter shrw shrb if nb > 25000, msymbol(circle_hollow) ) ///
-  (lfit shrw shrb if nb > 25000, lc(black)), scheme(s1mono) legend(off) ///
-  ylab( , angle(h) grid gstyle(dot)) xlab( , grid gstyle(dot))          ///
-  tit("Standardized Black and White Homicide Rates")                    ///
-  note("MSAs with at least 25,000 blacks.")                             ///
-  xtit("standardized black homicide rate")                              ///
-  ytit("standardized white homicide rate")
-graph export ~/desktop/bwh-fig5.pdf, replace
-
-graph twoway (scatter shrw shrb if nb > 25000, msymbol(circle_hollow) )   ///
-  (lfit shrw shrb if nb > 25000, lc(black))                               ///
-  (scatter shrw shrb if lbp, msymbol(circle))                             ///
-  (lfit shrw shrb if lbp, lc(black) lp(dash)), scheme(s1mono) legend(off) ///
-  ylab( , angle(h) grid gstyle(dot)) xlab( , grid gstyle(dot))            ///
-  tit("Standardized Black and White Homicide Rates")                      ///
-  note("Dark circles: MSAs with 10-25K blacks. Open circles: MSAs with 25K+ blacks.") ///
-  xtit("standardized black homicide rate")                                ///
-  ytit("standardized white homicide rate")
-graph export ~/desktop/bwh-fig6.pdf, replace
+*** Correlations
+corr hrw hrb if nb >= 20000 & !mi(nb)
+corr hrm hrf if nb >= 20000 & !mi(nb)
+corr hrya hroa if nb >= 20000 & !mi(nb)
 
 
-
-*** Unemployment and homicide
-corr hrb hrw if !mi(urb)
-
-corr uro urb urw
-
-regress hro uro if !mi(urb)
-regress hrb urb if !mi(urb)
-regress hrw urw if !mi(urb)
-
-corr uro urm urf
+*** Partial correlation
+gen pm = nm/np
+gen pb = nb/np
+gen py = nya/np
+pcorr hrw hrb pm pb py if nb >= 20000 & !mi(nb)
+pcorr hrm hrf pm pb py if nb >= 20000 & !mi(nb)
+pcorr hrya hroa pm pb py if nb >= 20000 & !mi(nb)
 
 
 *** South and homicide
-regress hro south if nb > 25000 & !mi(hrb)
-regress hrb south if nb > 25000 & !mi(hrb)
-regress hrw south if nb > 25000 & !mi(hrb) 
+regress hro south if nb > 20000 & !mi(nb)
+regress hrb south if nb > 20000 & !mi(nb)
+regress hrw south if nb > 20000 & !mi(nb) 
 
 gsort -hrb
 list name nb hrb if nb > 25000 & !mi(hrb) & hrb > 35, clean noobs
