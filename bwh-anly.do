@@ -117,6 +117,20 @@ pcorr hrm hrf pm pb py if nb >= 20000 & !mi(nb)
 pcorr hrya hroa pm pb py if nb >= 20000 & !mi(nb)
 
 
+*** Identifying MSAs with high/low black/white homicide rates
+sum hrb if nb > 20000 & !mi(nb), detail
+local hrb_p75 = r(p75)
+local hrb_p25 = r(p25)
+
+sum hrw if nb > 20000 & !mi(nb), detail
+local hrw_p75 = r(p75)
+local hrw_p25 = r(p25)
+
+list name nb hrb hrw if hrb > `hrb_p75' & hrw < `hrw_p25' & !mi(nb) & nb > 20000
+list name nb hrb hrw if hrw > `hrw_p75' & hrb < `hrb_p25' & !mi(nb) & nb > 20000
+list name nb hrb hrw if hrw > `hrw_p75' & hrb > `hrb_p75' & !mi(nb) & nb > 20000
+
+
 *** South and homicide
 regress hro south if nb > 20000 & !mi(nb)
 regress hrb south if nb > 20000 & !mi(nb)
