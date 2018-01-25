@@ -137,4 +137,10 @@ regress hrb south if nb > 20000 & !mi(nb)
 regress hrw south if nb > 20000 & !mi(nb) 
 
 gsort -hrb
-list name nb hrb if nb > 25000 & !mi(hrb) & hrb > 35, clean noobs
+list name nb hrb if nb > 20000 & !mi(hrb) & hrb > 35, clean noobs
+
+
+*** Polychoric correlations
+polychoric hro south if nb > 20000 & !mi(nb)
+polychoric hrb south if nb > 20000 & !mi(nb)
+polychoric hrw south if nb > 20000 & !mi(nb)
