@@ -100,6 +100,8 @@ graph twoway scatter hroa hrya [w = np] if nb >= 20000 & !mi(nb),      ///
 * Combining graphs
 graph combine g2.gph g3.gph g4.gph g1.gph, scheme(s1mono) iscale(0.5)
 graph export ~/desktop/bwh-fig1.pdf, replace
+graph export ~/desktop/bwh-fig1.tif, replace
+graph export ~/desktop/bwh-fig1.eps, replace
 
 
 *** Correlations
